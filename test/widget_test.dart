@@ -5,26 +5,36 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_test/flutter_test.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:my_quran/app/data/models/detail_surah.dart';
+import 'package:my_quran/app/data/models/surah.dart';
 
-import 'package:flutter_example/main.dart';
+void main() async {
+  Uri url = Uri.parse("https://api.quran.gading.dev/surah");
+  var res = await http.get(url);
 
-void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+  List data = (json.decode(res.body) as Map<String, dynamic>)["data"];
+  // 1-114 -> index ke 113 [An-Nas]
+  // print(data[113]["number"]);
+  // Data dari API(raw data) -> Model (Yang sudh disiapin)
+  Surah surahAnnas = Surah.fromJson(data[113]);
+  // print(surahAnnas.name);
+  // print("==========");
+  // print(surahAnnas.number);
+  // print("==========");
+  // print(surahAnnas.numberOfVerses);
+  // print("==========");
+  // print(surahAnnas.tafsir);
+  // print(surahAnnas.number);
+  Uri urlAnnas =
+      Uri.parse("https://api.quran.gading.dev/surah/${surahAnnas.number}");
+  var resAnnas = await http.get(urlAnnas);
+  Map<String, dynamic> dataAnnas =
+      (json.decode(resAnnas.body) as Map<String, dynamic>)["data"];
+  // Data dari API(raw data) -> Model (Yang sudh disiapin)
+  DetailSurah annas = DetailSurah.fromJson(dataAnnas);
+  print(annas.verses![0].text!.arab);
 }
